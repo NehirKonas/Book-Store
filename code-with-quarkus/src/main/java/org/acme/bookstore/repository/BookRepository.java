@@ -31,9 +31,23 @@ public class BookRepository {
 public List<Book> listBooksByAuthor(long authorId) {
     return em.createQuery(
         "SELECT b FROM Book b WHERE b.authorId = :authorId", Book.class
-    )
-    .setParameter("authorId", authorId)
-    .getResultList();
+    ).setParameter("authorId", authorId).getResultList();
+}
+
+public List<Book> listAudiobooks() {
+    return em.createQuery(
+        "SELECT b FROM Book b WHERE b.format = 'AUDIOBOOK'", Book.class
+    ).getResultList();
+}
+
+
+//Since the genre is not a string, for hybernate to find the genre it should be made into a string
+public Double findAveragePriceByGenre(String genre) {
+    Book.Genre enumGenre = Book.Genre.valueOf(genre.toUpperCase());
+    return em.createQuery(
+            "SELECT AVG(b.price) FROM Book b WHERE b.genre = :genre", Double.class)
+            .setParameter("genre", enumGenre)
+            .getSingleResult();
 }
 
 

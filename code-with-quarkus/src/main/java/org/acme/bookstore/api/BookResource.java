@@ -51,6 +51,22 @@ public class BookResource {
         return bookRepo.listBooksByAuthor(authorId);
     }
 
+    @GET
+    @Path("/audiobooks")
+    public List<Book> getAudiobooks() {
+        return bookRepo.listAudiobooks();
+    }
+
+    @GET
+    @Path("/average-price/{genre}")
+    public Response getAveragePriceByGenre(@PathParam("genre") String genre) {
+        Double avgPrice = bookRepo.findAveragePriceByGenre(genre);
+        if (avgPrice == null) {
+            return Response.status(Response.Status.NOT_FOUND).entity("No books found for genre: " + genre).build();
+        }
+        return Response.ok(avgPrice).build();
+    }
+
 
     @POST
     @Transactional
