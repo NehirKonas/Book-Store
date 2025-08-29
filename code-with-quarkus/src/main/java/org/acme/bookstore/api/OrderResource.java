@@ -12,20 +12,35 @@ import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
-import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-@Path("/order")
+@Path("/orders")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class OrderResource {
     
     @Inject 
     OrderRepository orderRepo;
+
+  
+    @GET
+    public List<Order> getAllOrders() {
+        return orderRepo.listAll();
+    }
+
+    @GET
+    @Path("/{id}")
+    public Response getOrderById(@PathParam("id") Long id) {
+        Order order = orderRepo.findById(id);
+        if (order == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        return Response.ok(order).build();
+    }
 
     @GET
     @Path("/customers")
@@ -62,14 +77,33 @@ public class OrderResource {
         return Response.ok(result).build();
     }
 
-    // Create order with items
+    // Create order (initially empty items)
     @POST
     @Transactional
-    public Response createOrder(Order order, List<OrderItem> items) {
-        orderRepo.createOrder(order, items);
+    public Response createOrder(Order order) {
+        orderRepo.createOrder(order, List.of());
         return Response.status(Response.Status.CREATED).entity(order).build();
     }
 
+    // Add items to an existing order
+    @POST
+    @Path("/{orderId}/items")
+    @Transactional
+    public Response addItemsToOrder(@PathParam("orderId") Long orderId, List<OrderItem> items) {
+        Order order = orderRepo.findById(orderId);
+        if (order == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+
+        // assign orderId to items
+        for (OrderItem item : items) {
+            item.setOrderId(orderId);
+        }
+
+        orderRepo.updateOrder(order, items); // orderRepo handles item persistence
+        return Response.ok(items).build();
+    }
+    /*
     // Update order with items
     @PUT
     @Path("/{id}")
@@ -83,7 +117,7 @@ public class OrderResource {
         orderRepo.updateOrder(order, items);
         return Response.ok(order).build();
     }
-
+    */
     // Delete order with items
     @DELETE
     @Path("/{id}")

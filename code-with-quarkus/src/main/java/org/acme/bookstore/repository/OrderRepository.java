@@ -113,6 +113,16 @@ public class OrderRepository {
      public Order findById(Long orderId) {
         return em.find(Order.class, orderId);
     }
+
+     public List<Order> listAll() {
+        return em.createQuery("SELECT o FROM Order o", Order.class).getResultList();
+     }
+
+     @Transactional
+    public void updateOrder(Order order) {
+        em.merge(order);
+    }
+
 }
 
 
