@@ -1,9 +1,10 @@
 package org.acme.bookstore.repository;
 
+import java.util.List;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-import java.util.List;
 
 @ApplicationScoped
 public class OrderRepository {
@@ -57,7 +58,7 @@ public class OrderRepository {
                         "GROUP BY b.genre " +
                         "ORDER BY total DESC",
                 Object[].class).setMaxResults(1).getResultList();
-        if (result == null) {
+        if (result.isEmpty()) {
             return null;
         } else {
             return result.get(0);
