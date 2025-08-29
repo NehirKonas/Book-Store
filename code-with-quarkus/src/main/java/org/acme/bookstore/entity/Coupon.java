@@ -15,7 +15,7 @@ public class Coupon {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long cupon_id;
+    private Long coupon_id;
 
     @Column(name = "discount" ,nullable= false)
     private int discount;
@@ -26,13 +26,21 @@ public class Coupon {
     @Column(name="isUsed")
     private boolean isUsed = false;
 
+    public Coupon(){}
+
+    public Coupon(int discount, LocalDate date, boolean used){
+        this.discount = discount;
+        this.expDate =  date;
+        this.isUsed = used;
+    }
+    
     //getters and setters
     public Long getCupon_id() {
-        return cupon_id;
+        return coupon_id;
     }
 
     public void setCupon_id(Long cupon_id) {
-        this.cupon_id = cupon_id;
+        this.coupon_id = cupon_id;
     }
 
     // Getter and Setter for discount
