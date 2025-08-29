@@ -2,9 +2,13 @@ package org.acme.bookstore.repository;
 
 import java.util.List;
 
+import org.acme.bookstore.entity.Order;
+import org.acme.bookstore.entity.OrderItem;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 
 @ApplicationScoped
 public class OrderRepository {
@@ -63,6 +67,51 @@ public class OrderRepository {
         } else {
             return result.get(0);
         }
+    }
+
+      // Create order + items
+    @Transactional
+    public void createOrder(Order order, List<OrderItem> items) {
+        em.persist(order);
+        for (OrderItem item : items) {
+            item.setOrderId(order.getId());
+            em.persist(item);
+        }
+    }
+
+    // Update order + items
+    @Transactional
+    public void updateOrder(Order order, List<OrderItem> items) {
+        em.merge(order);
+
+        // Sil eski itemları
+        em.createQuery("DELETE FROM OrderItem oi WHERE oi.orderId = :oid")
+          .setParameter("oid", order.getId())
+          .executeUpdate();
+
+        // Ekle yeni itemları
+        for (OrderItem item : items) {
+            item.setOrderId(order.getId());
+            em.persist(item);
+        }
+    }
+
+    // Delete order + items
+    @Transactional
+    public boolean deleteOrder(Long orderId) {
+        Order order = em.find(Order.class, orderId);
+        if (order != null) {
+            em.createQuery("DELETE FROM OrderItem oi WHERE oi.orderId = :oid")
+              .setParameter("oid", orderId)
+              .executeUpdate();
+            em.remove(order);
+            return true;
+        }
+        return false;
+    }
+
+     public Order findById(Long orderId) {
+        return em.find(Order.class, orderId);
     }
 }
 
