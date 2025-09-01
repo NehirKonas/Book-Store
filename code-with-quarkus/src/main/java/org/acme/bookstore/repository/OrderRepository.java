@@ -18,9 +18,10 @@ public class OrderRepository {
 
     public List<Object[]> listOrdersWithCustomerNames() {
         return em.createQuery(
-                "SELECT o.id, o.orderDate, u.username " +
-                        "FROM Order o JOIN o.user u " +
-                        "order BY o.orderDate DESC",
+                "SELECT o.id, o.date, c.username " +
+                        "FROM Order o JOIN Customer c " +
+                        "ON o.userId = c.id " +
+                        "order BY o.date DESC",
                 Object[].class).getResultList();
     }
 
@@ -34,10 +35,11 @@ public class OrderRepository {
 
     public Double totalRevenueForMonth(int year, int month) {
         Double res = em.createQuery(
-                "SELECT sum(oi.quantity * b.price) " +
-                        "FROM OrderItem oi JOIN oi.order o JOIN oi.book b " +
-                        "WHERE FUNCTION('year', o.orderDate) = :y " +
-                        "AND FUNCTION('month', o.orderDate) = :m",
+            "SELECT sum(oi.quantity * b.price) " +
+            "FROM OrderItem oi JOIN Order o ON oi.orderId = o.id " +
+            "JOIN Book b ON oi.bookId = b.id " +
+            "WHERE FUNCTION('year', o.date) = :y " +
+            "AND FUNCTION('month', o.date) = :m",
                 Double.class).setParameter("y", year).setParameter("m", month).getSingleResult();
         if (res == null) {
             return 0d;
@@ -48,17 +50,19 @@ public class OrderRepository {
 
     public List<Object[]> top5BestsellingBooks() {
         return em.createQuery(
-                "SELECT b.id, b.title, SUM(oi.quantity*b.price) AS revenue " +
-                        "FROM OrderItem oi JOIN oi.book b " +
-                        "GROUP BY b.id, b.title " +
-                        "ORDER BY revenue DESC",
+                "SELECT b.id, b.title, SUM(oi.quantity * b.price) AS revenue " +
+                "FROM OrderItem oi, Book b " +
+                "WHERE oi.bookId = b.id " +
+                "GROUP BY b.id, b.title " +
+                "ORDER BY revenue DESC",
                 Object[].class).setMaxResults(5).getResultList();
     }
 
     public Object[] mostPopularGenre() {
         List<Object[]> result = em.createQuery(
                 "SELECT b.genre, SUM(oi.quantity) AS total " +
-                        "FROM OrderItem oi JOIN oi.book b " +
+                        "FROM OrderItem oi, Book b " +
+                        "WHERE oi.bookId = b.id " +
                         "GROUP BY b.genre " +
                         "ORDER BY total DESC",
                 Object[].class).setMaxResults(1).getResultList();

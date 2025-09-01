@@ -43,6 +43,8 @@ public class OrderResource {
         return Response.ok(order).build();
     }
 
+
+    //TEST EDİLMEDİ
     @GET
     @Path("/customers")
     public List<Object []> listOrdersWithCustomerNames(){
@@ -107,7 +109,7 @@ public class OrderResource {
     
     // Update order with items
     @PUT
-    @Path("/{orderId}")
+    @Path("/{orderId}/items")
     @Transactional
     public Response updateOrder(@PathParam("orderId") Long id, List<OrderItem> items) {
         Order order = orderRepo.findById(id);
