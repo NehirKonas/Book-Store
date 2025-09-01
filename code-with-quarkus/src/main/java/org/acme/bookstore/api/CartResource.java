@@ -39,6 +39,15 @@ public class CartResource {
         return Response.ok(cart).build();
     }
 
+    @GET
+    @Path("/{cartId}/items")
+    public Response getCartItems(@PathParam("cartId") Long cartId) {
+        List<CartItem> items = cartRepo.getCartItems(cartId);
+        if (items.isEmpty()) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        return Response.ok(items).build();
+    }
 
     @POST
     @Transactional
@@ -48,7 +57,7 @@ public class CartResource {
 
     }
     @POST
-    @Path("/{userId}")
+    @Path("/{userId}/items")
     @Transactional
     public Response addItemsToCart(@PathParam("userId") Long id, List<CartItem> items){
         Cart cart = cartRepo.getCustomerCart(id);
@@ -68,9 +77,9 @@ public class CartResource {
 
     // Update order with items
     @PUT
-    @Path("/{orderId}/items")
+    @Path("/{cartId}/items")
     @Transactional
-    public Response updateOrder(@PathParam("orderId") Long id, List<CartItem> items) {
+    public Response updateCart(@PathParam("cartId") Long id, List<CartItem> items) {
         Cart cart = cartRepo.findById(id);
         if (cart == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
@@ -80,9 +89,9 @@ public class CartResource {
         return Response.ok(cart).build();
     }
     
-    // Delete order with items
+    // Delete  with items
     @DELETE
-    @Path("/{id}")
+    @Path("/{id}/items")
     @Transactional
     public Response deleteOrder(@PathParam("id") Long id) {
         boolean deleted = cartRepo.emptyCart(id);

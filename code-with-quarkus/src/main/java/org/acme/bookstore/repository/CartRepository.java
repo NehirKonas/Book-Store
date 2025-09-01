@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.acme.bookstore.entity.Cart;
 import org.acme.bookstore.entity.CartItem;
-import org.acme.bookstore.entity.Order;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -40,41 +39,46 @@ public class CartRepository {
     @Transactional
     public void addCartItems(Cart cart, List<CartItem> items) {
         for (CartItem item : items) {
-            item.setId(cart.getId());
-            em.persist(item);
+            item.setId(null); // ensure it's treated as new
+            item.setCartId(cart.getId()); // link to the correct cart
+            em.persist(item); // now it works
         }
     }
 
-    // Update cart + items
     @Transactional
     public void updateCart(Cart cart, List<CartItem> items) {
+        // Merge cart in case some fields changed
         em.merge(cart);
 
-        // Sil eski itemları
-        em.createQuery("DELETE FROM OrderItem oi WHERE oi.orderId = :oid")
-          .setParameter("oid", cart.getId())
-          .executeUpdate();
+        // Delete old cart items
+        em.createQuery("DELETE FROM CartItem ci WHERE ci.cartId = :cid")
+        .setParameter("cid", cart.getId())
+        .executeUpdate();
 
-        // Ekle yeni itemları
+        // Add new items
         for (CartItem item : items) {
-            item.setId(cart.getId());
+            item.setCartId(cart.getId()); // only set cartId
+            item.setId(null);             // ensure Hibernate treats it as new
             em.persist(item);
         }
     }
+
 
     // empty cart items
     @Transactional
-    public boolean emptyCart(Long cartId) {
-        Order cart = em.find(Order.class, cartId);
+    public boolean emptyCart(Long userId) {
+        Cart cart = getCustomerCart(userId); // find cart by userId
         if (cart != null) {
-            em.createQuery("DELETE FROM CartItem ci WHERE ci.orderId = :cid")
-              .setParameter("oid", cartId)
-              .executeUpdate();
-            em.remove(cart);
+            // Delete all items in that cart
+            em.createQuery("DELETE FROM CartItem ci WHERE ci.cartId = :cartId")
+            .setParameter("cartId", cart.getId())
+            .executeUpdate();
+
             return true;
         }
         return false;
     }
+
 
      public Cart findById(Long cartId) {
         return em.find(Cart.class, cartId);
@@ -91,11 +95,41 @@ public class CartRepository {
 
     public Cart getCustomerCart(Long id){
        Cart cart = em.createQuery(
-        "SELECT c FROM Cart c WHERE c.id = :customerId", Cart.class)
+        "SELECT c FROM Cart c WHERE c.userId = :customerId", Cart.class)
                 .setParameter("customerId", id)
                 .getSingleResult();
 
         return cart;
+    }
+
+    // In your CartRepository
+    public List<CartItem> getCartItems(Long userId) {
+        Cart cart = getCustomerCart(userId);
+        return em.createQuery(
+                "SELECT ci FROM CartItem ci WHERE ci.cartId = :cid", CartItem.class)
+                .setParameter("cid", cart.getId())
+                .getResultList();
+    }
+
+    @Transactional
+    public CartItem updateCartItemQuantity(Long cartId, Long itemId, int quantity) {
+        CartItem item = em.find(CartItem.class, itemId);
+        if (item != null && item.getCartId().equals(cartId)) {
+            item.setQuantity(quantity);
+            // persist not needed; managed entity will auto-update at commit
+            return item;
+        }
+        return null; // or throw exception
+    }
+
+    @Transactional
+    public boolean removeCartItem(Long cartId, Long itemId) {
+        CartItem item = em.find(CartItem.class, itemId);
+        if (item != null && item.getCartId().equals(cartId)) {
+            em.remove(item);
+            return true;
+        }
+        return false;
     }
 
     
