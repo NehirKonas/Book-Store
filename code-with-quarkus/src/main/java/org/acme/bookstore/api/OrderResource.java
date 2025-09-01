@@ -44,7 +44,6 @@ public class OrderResource {
     }
 
 
-    //TEST EDİLMEDİ
     @GET
     @Path("/customers")
     public List<Object []> listOrdersWithCustomerNames(){
