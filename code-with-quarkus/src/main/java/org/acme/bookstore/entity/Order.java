@@ -21,8 +21,8 @@ public class Order {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    @Column(name = "order_date", nullable = false)
-    private LocalDate date;
+    @Column(name = "order_date")
+    private LocalDate date = LocalDate.now();
 
     @Column(name= "complete")
     private boolean complete = false;

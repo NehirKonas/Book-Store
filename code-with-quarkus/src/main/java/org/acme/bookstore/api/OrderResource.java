@@ -12,6 +12,7 @@ import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
@@ -100,24 +101,24 @@ public class OrderResource {
             item.setOrderId(orderId);
         }
 
-        orderRepo.updateOrder(order, items); // orderRepo handles item persistence
+        orderRepo.addOrderItems(order, items); // orderRepo handles item persistence
         return Response.ok(items).build();
     }
-    /*
+    
     // Update order with items
     @PUT
-    @Path("/{id}")
+    @Path("/{orderId}")
     @Transactional
-    public Response updateOrder(@PathParam("id") Long id, Order order, List<OrderItem> items) {
-        Order existing = orderRepo.findById(id);
-        if (existing == null) {
+    public Response updateOrder(@PathParam("orderId") Long id, List<OrderItem> items) {
+        Order order = orderRepo.findById(id);
+        if (order == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
         order.setId(id);
         orderRepo.updateOrder(order, items);
         return Response.ok(order).build();
     }
-    */
+    
     // Delete order with items
     @DELETE
     @Path("/{id}")

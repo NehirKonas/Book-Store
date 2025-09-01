@@ -27,8 +27,8 @@ public class OrderRepository {
     public List<Object[]> listOrderItemsWithBookTitles(Long orderId) {
         return em.createQuery(
                 "SELECT b.id, b.title, oi.quantity " +
-                        "FROM OrderItem oi JOIN oi.book b " +
-                        "WHERE oi.order.id = :oid",
+                        "FROM OrderItem oi, Book b " +
+                        "WHERE oi.bookId = b.id AND oi.orderId = :oid",
                 Object[].class).setParameter("oid", orderId).getResultList();
     }
 
@@ -72,7 +72,17 @@ public class OrderRepository {
       // Create order + items
     @Transactional
     public void createOrder(Order order, List<OrderItem> items) {
-        em.persist(order);
+       em.persist(order);
+       em.flush();  // ensure order.id is generated
+
+        for (OrderItem item : items) {
+            item.setOrderId(order.getId());
+            em.persist(item);
+        }
+    }
+
+    @Transactional
+    public void addOrderItems(Order order, List<OrderItem> items) {
         for (OrderItem item : items) {
             item.setOrderId(order.getId());
             em.persist(item);
