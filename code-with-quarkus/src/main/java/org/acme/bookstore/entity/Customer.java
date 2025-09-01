@@ -43,6 +43,7 @@ public class Customer {
         this.disc = 5; // default minimum discount
     }
 
+    @SuppressWarnings("OverridableMethodCallInConstructor")
     public Customer(String username, String email, String password, String phoneNumber, LocalDate birthDate, boolean isLogged, int disc) {
         setUsername(username);
         setEmail(email);
