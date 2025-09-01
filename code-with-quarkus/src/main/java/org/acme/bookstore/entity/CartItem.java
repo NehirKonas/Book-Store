@@ -6,9 +6,11 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 @Entity
-@Table(name = "cart_item")
+@Table(name = "cart_item",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"cart_id", "book_id"}))
 public class CartItem {
 
     @Id

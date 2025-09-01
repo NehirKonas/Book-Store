@@ -24,9 +24,6 @@ public class Order {
     @Column(name = "order_date")
     private LocalDate date = LocalDate.now();
 
-    @Column(name= "complete")
-    private boolean complete = false;
-
     public Order() {}
 
     public Order(Long userId, LocalDate date) {
@@ -44,7 +41,5 @@ public class Order {
     public LocalDate getDate() { return date; }
     public void setDate(LocalDate date) { this.date = date; }
 
-    public boolean isComplete(){return complete;}
-    public void setComplete(boolean isComplete)
-         {this.complete = isComplete;}
+
 }
