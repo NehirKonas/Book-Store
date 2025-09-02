@@ -50,6 +50,12 @@ public class OrderResource {
         return orderRepo.listOrdersWithCustomerNames();
     }
 
+    @GET
+    @Path("/customers/{customerId}")
+    public List<Object []> listOrdersWithCustomerId(@PathParam("customerId") Long userId){
+        return orderRepo.listOrdersWithCustomerId(userId);
+    }
+
     @GET 
     @Path("/{orderId}/items")
     public List<Object []> getOrderItemsWithBookTitles(@PathParam("orderId") Long orderId){

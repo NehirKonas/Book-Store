@@ -34,7 +34,7 @@ public class OrderRepository {
         return em.createQuery(
                 "SELECT o.id, o.date " +
                         "FROM Order o  " +
-                        "ON o.userId = :userId " +
+                        "WHERE o.userId = :userId " +
                         "order BY o.date DESC",
                 Object[].class).setParameter("userId", userId).getResultList();
     }
