@@ -17,6 +17,8 @@ public class OrderRepository {
 
     @Inject
     EntityManager em;
+
+    @Inject
     BookRepository bookRepo;
 
     public List<Object[]> listOrdersWithCustomerNames() {
@@ -193,16 +195,17 @@ public class OrderRepository {
         return order;
     }
 
-    public Long getTotalOfOrder(Long orderId){
-        Long total = em.createQuery(
-           "SELECT SUM(oi.quantity * b.price) " +
-            "FROM OrderItem oi JOIN Book b ON oi.bookId = b.id " +
-            "WHERE oi.orderId = :oid", Long.class)
-            .setParameter("oid", orderId)
-            .getSingleResult();
-            
-            return total;
-    }
+   public Double getTotalOfOrder(Long orderId) {
+    Double total = em.createQuery(
+        "SELECT SUM(oi.quantity * b.price) " +
+        "FROM OrderItem oi JOIN Book b ON oi.bookId = b.id " +
+        "WHERE oi.orderId = :oid", Double.class)
+        .setParameter("oid", orderId)
+        .getSingleResult();
+
+    return total != null ? total : 0.0;
+}
+
 }
 
 

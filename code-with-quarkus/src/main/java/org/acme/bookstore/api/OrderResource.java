@@ -134,12 +134,12 @@ public class OrderResource {
 
 
     @POST
-    @Path("/{cartId}/checkout")
+    @Path("/cart/{cartId}/checkout")
     @Transactional
     public Response checkout(@PathParam("cartId") Long cartId) {
         try {
             Order order = orderRepo.checkoutCart(cartId);
-            Long total = orderRepo.getTotalOfOrder(cartId);
+            Double total = orderRepo.getTotalOfOrder(order.getId());
             System.out.println(total);
             return Response.status(Response.Status.CREATED).entity(order).build();
         } catch (IllegalArgumentException e) {
