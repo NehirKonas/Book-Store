@@ -37,12 +37,20 @@ public class CartRepository {
     }
 
     @Transactional
-    public void addCartItems(Cart cart, List<CartItem> items) {
-        for (CartItem item : items) {
+    public void addCartItems(Cart cart, CartItem item) {
+        Long stock = em.createQuery(
+            "SELECT b.quantity"+
+            "FROM Book b "+
+            "WHERE b.id = :bookId", Long.class).setParameter("bookId", item.getBookId()).getSingleResult();
+        
+        if(item.getQuantity() > stock){
+               throw new IllegalStateException("Not enough stock for bookId=" + item.getBookId());
+        }else{
             item.setId(null); // ensure it's treated as new
             item.setCartId(cart.getId()); // link to the correct cart
             em.persist(item); // now it works
         }
+            
     }
 
     @Transactional

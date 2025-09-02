@@ -59,19 +59,17 @@ public class CartResource {
     @POST
     @Path("/{userId}/items")
     @Transactional
-    public Response addItemsToCart(@PathParam("userId") Long id, List<CartItem> items){
+    public Response addItemCart(@PathParam("userId") Long id, CartItem item){
         Cart cart = cartRepo.getCustomerCart(id);
         if(cart == null){
             return Response.status(Response.Status.NOT_FOUND).build();
 
         }
 
-        for(CartItem item: items){
-            item.setCartId(id);
-        }
+        item.setCartId(id);
 
-        cartRepo.addCartItems(cart, items);
-        return Response.ok(items).build();
+        cartRepo.addCartItems(cart, item);
+        return Response.ok(item).build();
 
     }
 
