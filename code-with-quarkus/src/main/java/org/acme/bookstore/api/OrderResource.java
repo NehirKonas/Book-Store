@@ -133,4 +133,21 @@ public class OrderResource {
     }
 
 
+    @POST
+    @Path("/{cartId}/checkout")
+    @Transactional
+    public Response checkout(@PathParam("cartId") Long cartId) {
+        try {
+            Order order = orderRepo.checkoutCart(cartId);
+            Long total = orderRepo.getTotalOfOrder(cartId);
+            System.out.println(total);
+            return Response.status(Response.Status.CREATED).entity(order).build();
+        } catch (IllegalArgumentException e) {
+            return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
+        } catch (IllegalStateException e) {
+            return Response.status(Response.Status.CONFLICT).entity(e.getMessage()).build();
+        }
+
+    }
+  
 }

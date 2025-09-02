@@ -2,6 +2,8 @@ package org.acme.bookstore.repository;
 
 import java.util.List;
 
+import org.acme.bookstore.entity.Cart;
+import org.acme.bookstore.entity.CartItem;
 import org.acme.bookstore.entity.Order;
 import org.acme.bookstore.entity.OrderItem;
 
@@ -15,6 +17,7 @@ public class OrderRepository {
 
     @Inject
     EntityManager em;
+    BookRepository bookRepo;
 
     public List<Object[]> listOrdersWithCustomerNames() {
         return em.createQuery(
@@ -23,6 +26,15 @@ public class OrderRepository {
                         "ON o.userId = c.id " +
                         "order BY o.date DESC",
                 Object[].class).getResultList();
+    }
+
+    public List<Object[]> listOrdersWithCustomerId(Long userId) {
+        return em.createQuery(
+                "SELECT o.id, o.date " +
+                        "FROM Order o  " +
+                        "ON o.userId = :userId " +
+                        "order BY o.date DESC",
+                Object[].class).setParameter("userId", userId).getResultList();
     }
 
     public List<Object[]> listOrderItemsWithBookTitles(Long orderId) {
@@ -137,6 +149,60 @@ public class OrderRepository {
         em.merge(order);
     }
 
+    public Order checkoutCart(Long cartId) {
+        Long cartExists = em.createQuery(
+                "SELECT COUNT(c) FROM Cart c WHERE c.id = :cartId", Long.class)
+                .setParameter("cartId", cartId)
+                .getSingleResult();
+        if (cartExists == 0) {
+            throw new IllegalArgumentException("Cart not found");
+        }
+
+        //get cart items
+        List<CartItem> cartItems = em.createQuery(
+            "SELECT ci FROM CartItem ci WHERE ci.cartId = :cartId", CartItem.class)
+            .setParameter("cartId", cartId)
+            .getResultList();
+
+        if (cartItems.isEmpty()) {
+            throw new IllegalStateException("Cart is empty");
+        }
+
+        // Create new order
+        Order order = new Order();
+
+        order.setUserId(em.find(Cart.class, cartId).getUserId());
+
+        List<OrderItem> orderItems = cartItems.stream()
+        .map(ci -> new OrderItem(null, ci.getBookId(), ci.getQuantity()))
+        .toList();
+
+        //insert order items
+        createOrder(order,orderItems);
+    
+        // Decrease stock
+        for (CartItem item : cartItems) {
+            bookRepo.decreaseStock(item.getBookId(), item.getQuantity());
+        }
+
+        //clear cart
+        em.createQuery("DELETE FROM CartItem ci WHERE ci.cartId = :cartId")
+            .setParameter("cartId", cartId)
+            .executeUpdate();
+
+        return order;
+    }
+
+    public Long getTotalOfOrder(Long orderId){
+        Long total = em.createQuery(
+           "SELECT SUM(oi.quantity * b.price) " +
+            "FROM OrderItem oi JOIN Book b ON oi.bookId = b.id " +
+            "WHERE oi.orderId = :oid", Long.class)
+            .setParameter("oid", orderId)
+            .getSingleResult();
+            
+            return total;
+    }
 }
 
 

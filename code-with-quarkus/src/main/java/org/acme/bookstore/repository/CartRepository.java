@@ -38,10 +38,10 @@ public class CartRepository {
 
     @Transactional
     public void addCartItems(Cart cart, CartItem item) {
-        Long stock = em.createQuery(
-            "SELECT b.quantity"+
+        int stock = em.createQuery(
+            "SELECT b.stock "+
             "FROM Book b "+
-            "WHERE b.id = :bookId", Long.class).setParameter("bookId", item.getBookId()).getSingleResult();
+            "WHERE b.id = :bookId", int.class).setParameter("bookId", item.getBookId()).getSingleResult();
         
         if(item.getQuantity() > stock){
                throw new IllegalStateException("Not enough stock for bookId=" + item.getBookId());

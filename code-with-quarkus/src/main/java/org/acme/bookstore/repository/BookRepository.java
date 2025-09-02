@@ -1,12 +1,13 @@
 package org.acme.bookstore.repository;
 
+import java.util.List;
+
+import org.acme.bookstore.entity.Book;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
-import org.acme.bookstore.entity.Book;
-
-import java.util.List;
 
 @ApplicationScoped
 public class BookRepository {
@@ -78,5 +79,19 @@ public Double findAveragePriceByGenre(String genre) {
     @Transactional
     public Book update(Book book) {
         return em.merge(book);
+    }
+
+    @Transactional
+    public void decreaseStock(Long bookId, int amount) {
+        Book book = em.find(Book.class, bookId);
+        if (book.getStock() < amount) {
+            throw new IllegalArgumentException("Not enough stock");
+        }
+
+        // Decrease stock
+        book.setStock(book.getStock() - amount);
+
+        // Persist the change
+        em.merge(book);
     }
 }
