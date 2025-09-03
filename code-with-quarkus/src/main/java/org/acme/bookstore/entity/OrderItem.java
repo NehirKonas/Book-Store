@@ -14,7 +14,7 @@ import jakarta.persistence.UniqueConstraint;
 public class OrderItem {
  
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy  = GenerationType.IDENTITY)
     @Column(name = "order_item_id")
     private Long id;
 
@@ -41,7 +41,7 @@ public class OrderItem {
 
     public Long getOrderId() { return orderId; }
     public void setOrderId(Long orderId) { this.orderId = orderId; }
-
+ 
     public Long getBookId() { return bookId; }
     public void setBookId(Long bookId) { this.bookId = bookId; }
 
