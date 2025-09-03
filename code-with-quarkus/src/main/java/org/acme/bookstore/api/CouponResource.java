@@ -3,9 +3,7 @@ package org.acme.bookstore.api;
 import java.util.List;
 
 import org.acme.bookstore.entity.Coupon;
-// import org.acme.bookstore.entity.Customer;
 import org.acme.bookstore.repository.CouponRepository;
-// import org.acme.bookstore.repository.CouponRepository.generateCode;
 
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -20,7 +18,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-@Path("/coupons")
+@Path("/api/coupons")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class CouponResource {
