@@ -1,16 +1,21 @@
 package org.acme.bookstore.entity;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "customers")
+@Table(name = "customer")
 public class Customer {
 
     @Id
@@ -18,63 +23,79 @@ public class Customer {
     @Column(name = "customer_id")
     private Long id;
 
-    @Column(name = "username", nullable = false)
-    private String username;
-
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "phone_number")
-    private String phoneNumber;
+    @Column(name = "first_name")
+    private String firstName;
+
+    @Column(name = "last_name")
+    private String lastName;
+
+    @Column(name = "address")
+    private String address;
+
+    @Column(name = "phone")
+    private String phone;
 
     @Column(name = "birth_date")
     private LocalDate birthDate;
 
-    @Column(name = "is_logged")
-    private boolean isLogged;
-
     @Column(name = "disc")
-    private int disc; // new discount field
+    private int disc; // discount field like your friends' version
 
+    @OneToMany
+    @JoinColumn(name = "customer_id")
+    private List<Order> orders = new ArrayList<>();
+
+    @OneToOne
+    @JoinColumn(name = "cart_id", unique = true)
+    private Cart cart;
+
+    // Default constructor
     public Customer() {
         this.disc = 5; // default minimum discount
     }
 
-    @SuppressWarnings("OverridableMethodCallInConstructor")
-    public Customer(String username, String email, String password, String phoneNumber, LocalDate birthDate, boolean isLogged, int disc) {
-        setUsername(username);
+    public Customer(String email, String password, String firstName, String lastName,
+            String address, String phone, LocalDate birthDate, int disc) {
         setEmail(email);
         setPassword(password);
-        this.phoneNumber = phoneNumber;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.address = address;
+        this.phone = phone;
         this.birthDate = birthDate;
-        this.isLogged = isLogged;
-        setDisc(disc); // ensure it's in range
+        setDisc(disc);
     }
 
-    // Getters and Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-
-    public String getUsername() { return username; }
-    public void setUsername(String username) {
-        if (username == null || username.length() < 5) {
-            throw new IllegalArgumentException("Username cannot be null and must be at least 5 characters");
-        }
-        this.username = username;
+    // Getters and Setters with validation
+    public Long getId() {
+        return id;
     }
 
-    public String getEmail() { return email; }
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
     public void setEmail(String email) {
-        if (email == null || !email.matches("^[a-z0-9]+@gmail\\.com$")) {
-            throw new IllegalArgumentException("Email must be lowercase, no special characters, and end with @gmail.com");
+        if (email == null || email.trim().isEmpty()) {
+            throw new IllegalArgumentException("Email cannot be null or empty");
         }
-        this.email = email;
+        this.email = email.toLowerCase().trim();
     }
 
-    public String getPassword() { return password; }
+    public String getPassword() {
+        return password;
+    }
+
     public void setPassword(String password) {
         if (password == null || password.length() < 6) {
             throw new IllegalArgumentException("Password cannot be null and must be at least 6 characters");
@@ -82,20 +103,70 @@ public class Customer {
         this.password = password;
     }
 
-    public String getPhoneNumber() { return phoneNumber; }
-    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
+    public String getFirstName() {
+        return firstName;
+    }
 
-    public LocalDate getBirthDate() { return birthDate; }
-    public void setBirthDate(LocalDate birthDate) { this.birthDate = birthDate; }
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
 
-    public boolean isLogged() { return isLogged; }
-    public void setLogged(boolean logged) { isLogged = logged; }
+    public String getLastName() {
+        return lastName;
+    }
 
-    public int getDisc() { return disc; }
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public LocalDate getBirthDate() {
+        return birthDate;
+    }
+
+    public void setBirthDate(LocalDate birthDate) {
+        this.birthDate = birthDate;
+    }
+
+    public int getDisc() {
+        return disc;
+    }
+
     public void setDisc(int disc) {
         if (disc < 5 || disc > 50) {
             throw new IllegalArgumentException("Disc must be between 5 and 50");
         }
         this.disc = disc;
+    }
+
+    public List<Order> getOrders() {
+        return orders;
+    }
+
+    public void setOrders(List<Order> orders) {
+        this.orders = orders;
+    }
+
+    public Cart getCart() {
+        return cart;
+    }
+
+    public void setCart(Cart cart) {
+        this.cart = cart;
     }
 }
