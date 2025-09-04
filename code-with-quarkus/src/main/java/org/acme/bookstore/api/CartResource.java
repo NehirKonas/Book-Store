@@ -99,6 +99,28 @@ public class CartResource {
         return Response.noContent().build();
     }
 
+    // Delete spesific book from cart
+    @DELETE
+    @Path("/{userId}/items/{bookId}")
+    @Transactional
+    public Response deleteCartItem(@PathParam("userId") Long userId, @PathParam("bookId") Long bookId) {
+        boolean deleted = cartRepo.rmBookFromCart(userId, bookId);
+        if (!deleted) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        return Response.noContent().build();
+    }
 
+    @GET 
+    @Path("/{userId}/items")
+    public List<Object []> getOrderItemsWithBookTitles(@PathParam("userId") Long userId){
+        return cartRepo.listCartItemsWithBookTitles(userId);
+    }
+
+    @GET 
+    @Path("/{userId}/items/total")
+    public Double getTotalOfCart(@PathParam("userId") Long userId){
+        return cartRepo.getTotalOfCart(userId);
+    }
 
 }

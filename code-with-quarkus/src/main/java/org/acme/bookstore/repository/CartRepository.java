@@ -9,6 +9,10 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.core.Response;
 
 @ApplicationScoped
 public class CartRepository {
@@ -140,5 +144,82 @@ public class CartRepository {
         return false;
     }
 
-    
+    public List<Object[]> listCartItemsWithBookTitles(Long userId) {
+        return em.createQuery(
+                "SELECT b.id, b.title,b.author, b.price, ci.quantity " +
+                        "FROM CartItem ci, Book b " +
+                        "WHERE ci.bookId = b.id AND oi.userId = :uid",
+                Object[].class).setParameter("uid", userId).getResultList();
+    }
+
+    public Double getTotalOfCart(Long userId) {
+    Double total = em.createQuery(
+        "SELECT SUM(ci.quantity * b.price) " +
+        "FROM CartItem ci JOIN Book b ON ci.bookId = b.id " +
+        "WHERE ci.cartId = :uid", Double.class)
+        .setParameter("uid", userId)
+        .getSingleResult();
+
+        return total != null ? total : 0.0;
+    }
+
+    @Transactional
+    public boolean rmBookFromCart(Long userId, Long bookId) {
+        Long cartId = em.createQuery("SELECT c.id FROM Cart c WHERE c.userId = :uid", Long.class)
+                .setParameter("uid", userId)
+                .getSingleResult();
+
+        int deletedRows = em.createQuery(
+                "DELETE FROM CartItem ci WHERE ci.bookId = :bid AND ci.cartId = :cid")
+                .setParameter("bid", bookId)
+                .setParameter("cid", cartId)
+                .executeUpdate();
+
+        return deletedRows > 0;
+    }
+
+    @PUT
+    @Path("/{cartId}/items/{bookId}/increment")
+    @Transactional
+    public Response incrementCartItem(@PathParam("cartId") Long cartId, @PathParam("bookId") Long bookId) {
+        CartItem item = em.createQuery(
+            "SELECT ci FROM CartItem ci WHERE ci.cartId = :cid AND ci.bookId = :bid", CartItem.class)
+            .setParameter("cid", cartId)
+            .setParameter("bid", bookId)
+            .getSingleResult();
+
+        if (item == null) return Response.status(Response.Status.NOT_FOUND).build();
+        int stock = em.createQuery(
+                "SELECT b.stock "+
+                "FROM Book b "+
+                "WHERE b.id = :bookId", int.class).setParameter("bookId", item.getBookId()).getSingleResult();
+            
+        if(stock < item.getQuantity() + 1) return Response.status(Response.Status.NOT_ACCEPTABLE).build();
+
+        item.setQuantity(item.getQuantity() + 1);
+        em.merge(item);
+        return Response.ok(item).build();
+    }
+
+    @PUT
+    @Path("/{cartId}/items/{bookId}/decrement")
+    @Transactional
+    public Response decrementCartItem(@PathParam("cartId") Long cartId, @PathParam("bookId") Long bookId) {
+        CartItem item = em.createQuery(
+            "SELECT ci FROM CartItem ci WHERE ci.cartId = :cid AND ci.bookId = :bid", CartItem.class)
+            .setParameter("cid", cartId)
+            .setParameter("bid", bookId)
+            .getSingleResult();
+
+        if (item == null) return Response.status(Response.Status.NOT_FOUND).build();
+
+        if (item.getQuantity() > 1) {
+            item.setQuantity(item.getQuantity() - 1);
+            em.merge(item);
+        }
+
+        return Response.ok(item).build();
+    }
+
+
 }
