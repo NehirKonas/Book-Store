@@ -11,7 +11,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -50,10 +49,6 @@ public class Customer {
     @OneToMany
     @JoinColumn(name = "customer_id")
     private List<Order> orders = new ArrayList<>();
-
-    @OneToOne
-    @JoinColumn(name = "cart_id", unique = true)
-    private Cart cart;
 
     // Default constructor
     public Customer() {
@@ -162,11 +157,4 @@ public class Customer {
         this.orders = orders;
     }
 
-    public Cart getCart() {
-        return cart;
-    }
-
-    public void setCart(Cart cart) {
-        this.cart = cart;
-    }
 }
