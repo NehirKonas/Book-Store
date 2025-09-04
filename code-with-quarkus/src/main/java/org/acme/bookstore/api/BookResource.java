@@ -27,6 +27,7 @@ public class BookResource {
     BookRepository bookRepo;
 
     @GET
+    @Path("/allBooks")
     public List<Book> getAllBooks() {
         return bookRepo.listAll();
     }
@@ -74,7 +75,6 @@ public class BookResource {
         }
         return Response.ok(avgPrice).build();
     }
-
 
     @POST
     @Transactional
