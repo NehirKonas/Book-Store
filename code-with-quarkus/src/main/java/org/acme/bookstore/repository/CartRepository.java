@@ -116,10 +116,9 @@ public class CartRepository {
 
     // In your CartRepository
     public List<CartItem> getCartItems(Long userId) {
-        Cart cart = getCustomerCart(userId);
         return em.createQuery(
-                "SELECT ci FROM CartItem ci WHERE ci.cartId = :cid", CartItem.class)
-                .setParameter("cid", cart.getId())
+                "SELECT ci FROM CartItem ci WHERE ci.userId = :uid", CartItem.class)
+                .setParameter("uid", userId)
                 .getResultList();
     }
 
@@ -147,8 +146,8 @@ public class CartRepository {
     public List<Object[]> listCartItemsWithBookTitles(Long userId) {
         return em.createQuery(
                 "SELECT b.id, b.title,b.author, b.price, ci.quantity " +
-                        "FROM CartItem ci, Book b " +
-                        "WHERE ci.bookId = b.id AND oi.userId = :uid",
+                        "FROM CartItem ci JOIN Book b ON ci.bookId = b.id " +
+                        "WHERE ci.cartId = :uid",
                 Object[].class).setParameter("uid", userId).getResultList();
     }
 

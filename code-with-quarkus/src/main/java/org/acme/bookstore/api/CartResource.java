@@ -38,17 +38,17 @@ public class CartResource {
 
         return Response.ok(cart).build();
     }
-
+/* 
     @GET
-    @Path("/{cartId}/items")
-    public Response getCartItems(@PathParam("cartId") Long cartId) {
-        List<CartItem> items = cartRepo.getCartItems(cartId);
+    @Path("/{userId}/items")
+    public Response getCartItems(@PathParam("userId") Long userId) {
+        List<CartItem> items = cartRepo.getCartItems(userId);
         if (items.isEmpty()) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
         return Response.ok(items).build();
     }
-
+*/
     @POST
     @Transactional
     public Response createCart(Cart cart){
