@@ -35,8 +35,8 @@ public class Book {
     @Column(name = "publish_date")
     private LocalDate date;
 
-    @Column(name = "authorId")
-    private long authorId;
+    @Column(name = "author")
+    private String author;
 
     @Column(name = "price")
     private double price;
@@ -55,7 +55,7 @@ public class Book {
 
     public Book() {}
 
-    public Book(String title, BookFormat format, BookLang language, LocalDate date, double price, int pageNumber, String isbn, int stock, Genre genre, Long publisherId, long authorId) {
+    public Book(String title, BookFormat format, BookLang language, LocalDate date, double price, int pageNumber, String isbn, int stock, Genre genre, Long publisherId, String author) {
     this.title = title;
     this.format = format;
     this.language = language;
@@ -66,7 +66,7 @@ public class Book {
     this.stock = stock;
     this.genre = genre;
     this.publisherId = publisherId;
-    this.authorId = authorId;
+    this.author = author;
 }
 
     // Getters and setters
@@ -103,6 +103,6 @@ public class Book {
     public Long getPublisherId() { return publisherId; }
     public void setPublisherId(Long publisherId) { this.publisherId = publisherId; }
 
-    public Long getAuthorId() { return authorId; }
-    public void setAuthorId(Long authorId) { this.authorId = authorId; }
+    public String getAuthor() { return author; }
+    public void setAuthor(String author) { this.author = author; }
 }
