@@ -123,4 +123,16 @@ public class CartResource {
         return cartRepo.getTotalOfCart(userId);
     }
 
+    @PUT
+    @Path("/{userId}/items/{bookId}/increment")
+    public Response incrementCartItem(@PathParam("userId") Long userId, @PathParam("bookId") Long bookId){
+        return cartRepo.incrementCartItem(userId, bookId);
+    }
+
+    @PUT
+    @Path("/{userId}/items/{bookId}/decrement")
+    public Response decrementCartItem(@PathParam("userId") Long userId, @PathParam("bookId") Long bookId) {
+        return cartRepo.decrementCartItem(userId, bookId);
+    }
+  
 }

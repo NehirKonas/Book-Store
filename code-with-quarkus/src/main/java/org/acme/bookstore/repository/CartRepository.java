@@ -146,16 +146,16 @@ public class CartRepository {
     public List<Object[]> listCartItemsWithBookTitles(Long userId) {
         return em.createQuery(
                 "SELECT b.id, b.title,b.author, b.price, ci.quantity " +
-                        "FROM CartItem ci JOIN Book b ON ci.bookId = b.id " +
-                        "WHERE ci.cartId = :uid",
+                        "FROM CartItem ci JOIN Book b ON ci.bookId = b.id JOIN Cart c ON c.id = ci.cartId " +
+                        "WHERE c.userId = :uid",
                 Object[].class).setParameter("uid", userId).getResultList();
     }
 
     public Double getTotalOfCart(Long userId) {
     Double total = em.createQuery(
         "SELECT SUM(ci.quantity * b.price) " +
-        "FROM CartItem ci JOIN Book b ON ci.bookId = b.id " +
-        "WHERE ci.cartId = :uid", Double.class)
+        "FROM CartItem ci JOIN Book b ON ci.bookId = b.id JOIN Cart c ON c.id = ci.cartId " +
+        "WHERE c.userId = :uid", Double.class)
         .setParameter("uid", userId)
         .getSingleResult();
 
@@ -176,14 +176,12 @@ public class CartRepository {
 
         return deletedRows > 0;
     }
-
-    @PUT
-    @Path("/{cartId}/items/{bookId}/increment")
+    
     @Transactional
-    public Response incrementCartItem(@PathParam("cartId") Long cartId, @PathParam("bookId") Long bookId) {
+    public Response incrementCartItem( Long userId, Long bookId) {
         CartItem item = em.createQuery(
-            "SELECT ci FROM CartItem ci WHERE ci.cartId = :cid AND ci.bookId = :bid", CartItem.class)
-            .setParameter("cid", cartId)
+            "SELECT ci FROM CartItem ci JOIN Cart c ON ci.cartId = c.id WHERE ci.bookId = :bid AND c.userId = :uid", CartItem.class)
+            .setParameter("uid", userId)
             .setParameter("bid", bookId)
             .getSingleResult();
 
@@ -200,13 +198,11 @@ public class CartRepository {
         return Response.ok(item).build();
     }
 
-    @PUT
-    @Path("/{cartId}/items/{bookId}/decrement")
     @Transactional
-    public Response decrementCartItem(@PathParam("cartId") Long cartId, @PathParam("bookId") Long bookId) {
+    public Response decrementCartItem( Long userId,Long bookId) {
         CartItem item = em.createQuery(
-            "SELECT ci FROM CartItem ci WHERE ci.cartId = :cid AND ci.bookId = :bid", CartItem.class)
-            .setParameter("cid", cartId)
+            "SELECT ci FROM CartItem ci JOIN Cart c ON ci.cartId = c.id WHERE ci.bookId = :bid AND c.userId = :uid", CartItem.class)
+            .setParameter("uid", userId)
             .setParameter("bid", bookId)
             .getSingleResult();
 
