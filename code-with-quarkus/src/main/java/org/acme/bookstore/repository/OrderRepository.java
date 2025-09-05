@@ -151,10 +151,10 @@ public class OrderRepository {
         em.merge(order);
     }
 
-    public Order checkoutCart(Long cartId) {
+    public Order checkoutCart(Long userId) {
         Long cartExists = em.createQuery(
-                "SELECT COUNT(c) FROM Cart c WHERE c.id = :cartId", Long.class)
-                .setParameter("cartId", cartId)
+                "SELECT COUNT(c) FROM Cart c WHERE c.userId = :userId", Long.class)
+                .setParameter("userId", userId)
                 .getSingleResult();
         if (cartExists == 0) {
             throw new IllegalArgumentException("Cart not found");
@@ -162,8 +162,8 @@ public class OrderRepository {
 
         //get cart items
         List<CartItem> cartItems = em.createQuery(
-            "SELECT ci FROM CartItem ci WHERE ci.cartId = :cartId", CartItem.class)
-            .setParameter("cartId", cartId)
+            "SELECT ci FROM CartItem ci JOIN Cart c ON c.id = ci.cartId WHERE c.userId = :uid", CartItem.class)
+            .setParameter("uid", userId)
             .getResultList();
 
         if (cartItems.isEmpty()) {
@@ -173,21 +173,22 @@ public class OrderRepository {
         // Create new order
         Order order = new Order();
 
-        order.setUserId(em.find(Cart.class, cartId).getUserId());
+        order.setUserId(userId);
 
         List<OrderItem> orderItems = cartItems.stream()
         .map(ci -> new OrderItem(null, ci.getBookId(), ci.getQuantity()))
         .toList();
 
         //insert order items
-        createOrder(order,orderItems);
+        createOrder(order, orderItems);
     
         // Decrease stock
         for (CartItem item : cartItems) {
             bookRepo.decreaseStock(item.getBookId(), item.getQuantity());
         }
 
-        //clear cart
+        //find cart id and delete cart items
+        Long cartId = em.createQuery("SELECT c.id FROM Cart c WHERE c.userId = :uid", Long.class).setParameter("uid", userId).getSingleResult();
         em.createQuery("DELETE FROM CartItem ci WHERE ci.cartId = :cartId")
             .setParameter("cartId", cartId)
             .executeUpdate();
