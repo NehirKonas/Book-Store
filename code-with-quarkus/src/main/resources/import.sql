@@ -10,14 +10,38 @@
 INSERT INTO authors (id, name) VALUES
   (1, 'Isaac Asimov'),
   (2, 'Stephen King'),
-  (3, 'Antoine de Saint-Exupéry')
+  (3, 'Antoine de Saint-Exupéry'),  
+  (4,  'Ursula K. Le Guin'),
+  (5,  'Orhan Pamuk'),
+  (6,  'Gabriel García Márquez'),
+  (7,  'Mary Shelley'),
+  (8,  'Julia Child'),
+  (9,  'Yuval Noah Harari'),
+  (10, 'Stephen Hawking'),
+  (11, 'Nazım Hikmet'),
+  (12, 'Franz Kafka'),
+  (13, 'Jorge Luis Borges'),
+  (14, 'Frank Herbert'),
+  (15, 'Arthur Conan Doyle'),
+  (18, 'George Orwell'),
+  (19, 'H. P. Lovecraft'),
+  (20, 'Sun Tzu'),
+  (22, 'H. G. Wells'),
+  (23, 'Richard Dawkins')
 ON DUPLICATE KEY UPDATE name = VALUES(name);
-
 -- Publishers
 INSERT INTO publishers (id, name) VALUES
   (1, 'Penguin Random House'),
   (2, 'HarperCollins'),
-  (3, 'Gallimard')
+  (3, 'Gallimard'),  
+  (4,  'Ace Books'),
+  (5,  'İletişim Yayınları'),
+  (6,  'Vintage'),
+  (7,  'Knopf'),
+  (9,  'Oxford University Press'),
+  (10, 'Bantam Books'),
+  (11, 'Penguin Classics'),
+  (13, 'Dover Publications')
 ON DUPLICATE KEY UPDATE name = VALUES(name);
 
 -- Books (match your enum strings & column names exactly)
