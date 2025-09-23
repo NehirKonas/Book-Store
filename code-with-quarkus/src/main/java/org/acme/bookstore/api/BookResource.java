@@ -27,8 +27,25 @@ public class BookResource {
     BookRepository bookRepo;
 
     @GET
+    @Path("/allBooks")
     public List<Book> getAllBooks() {
         return bookRepo.listAll();
+    }
+
+    @GET
+    @Path("/authors/{id}/name")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String getAuthorNameById(@PathParam("id") Long id) {
+        String name = bookRepo.findAuthorNameById(id);
+        return name == null ? "" : name;
+    }
+
+    @GET
+    @Path("/publishers/{id}/name")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String getPublisherNameById(@PathParam("id") Long id) {
+        String name = bookRepo.findPublisherNameById(id);
+        return name == null ? "" : name;
     }
 
     @GET
@@ -74,7 +91,6 @@ public class BookResource {
         }
         return Response.ok(avgPrice).build();
     }
-
 
     @POST
     @Transactional
