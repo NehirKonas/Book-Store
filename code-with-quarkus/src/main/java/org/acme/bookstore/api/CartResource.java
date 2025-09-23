@@ -23,45 +23,48 @@ import jakarta.ws.rs.core.Response;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class CartResource {
-    
+
     @Inject
     CartRepository cartRepo;
-    
+
     @GET
     @Path("/{userId}")
-    public Response getCartOfCustomer(@PathParam("userId") Long id){
+    public Response getCartOfCustomer(@PathParam("userId") Long id) {
         Cart cart = cartRepo.getCustomerCart(id);
 
-        if(cart == null){
+        if (cart == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
 
         return Response.ok(cart).build();
     }
-/* 
-    @GET
-    @Path("/{userId}/items")
-    public Response getCartItems(@PathParam("userId") Long userId) {
-        List<CartItem> items = cartRepo.getCartItems(userId);
-        if (items.isEmpty()) {
-            return Response.status(Response.Status.NOT_FOUND).build();
-        }
-        return Response.ok(items).build();
-    }
-*/
+
+    /*
+     * @GET
+     * 
+     * @Path("/{userId}/items")
+     * public Response getCartItems(@PathParam("userId") Long userId) {
+     * List<CartItem> items = cartRepo.getCartItems(userId);
+     * if (items.isEmpty()) {
+     * return Response.status(Response.Status.NOT_FOUND).build();
+     * }
+     * return Response.ok(items).build();
+     * }
+     */
     @POST
     @Transactional
-    public Response createCart(Cart cart){
+    public Response createCart(Cart cart) {
         cartRepo.createCart(cart, List.of());
         return Response.status(Response.Status.CREATED).entity(cart).build();
 
     }
+
     @POST
     @Path("/{userId}/items")
     @Transactional
-    public Response addItemCart(@PathParam("userId") Long id, CartItem item){
+    public Response addItemCart(@PathParam("userId") Long id, CartItem item) {
         Cart cart = cartRepo.getCustomerCart(id);
-        if(cart == null){
+        if (cart == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
 
         }
@@ -86,8 +89,8 @@ public class CartResource {
         cartRepo.updateCart(cart, items);
         return Response.ok(cart).build();
     }
-    
-    // Delete  with items
+
+    // Delete with items
     @DELETE
     @Path("/{id}/items")
     @Transactional
@@ -111,21 +114,21 @@ public class CartResource {
         return Response.noContent().build();
     }
 
-    @GET 
+    @GET
     @Path("/{userId}/items")
-    public List<Object []> getOrderItemsWithBookTitles(@PathParam("userId") Long userId){
+    public List<Object[]> getOrderItemsWithBookTitles(@PathParam("userId") Long userId) {
         return cartRepo.listCartItemsWithBookTitles(userId);
     }
 
-    @GET 
+    @GET
     @Path("/{userId}/items/total")
-    public Double getTotalOfCart(@PathParam("userId") Long userId){
+    public Double getTotalOfCart(@PathParam("userId") Long userId) {
         return cartRepo.getTotalOfCart(userId);
     }
 
     @PUT
     @Path("/{userId}/items/{bookId}/increment")
-    public Response incrementCartItem(@PathParam("userId") Long userId, @PathParam("bookId") Long bookId){
+    public Response incrementCartItem(@PathParam("userId") Long userId, @PathParam("bookId") Long bookId) {
         return cartRepo.incrementCartItem(userId, bookId);
     }
 
@@ -134,5 +137,5 @@ public class CartResource {
     public Response decrementCartItem(@PathParam("userId") Long userId, @PathParam("bookId") Long bookId) {
         return cartRepo.decrementCartItem(userId, bookId);
     }
-  
+
 }

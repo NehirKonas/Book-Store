@@ -23,11 +23,10 @@ import jakarta.ws.rs.core.Response;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class OrderResource {
-    
-    @Inject 
+
+    @Inject
     OrderRepository orderRepo;
 
-  
     @GET
     public List<Order> getAllOrders() {
         return orderRepo.listAll();
@@ -43,22 +42,21 @@ public class OrderResource {
         return Response.ok(order).build();
     }
 
-
     @GET
     @Path("/customers")
-    public List<Object []> listOrdersWithCustomerNames(){
+    public List<Object[]> listOrdersWithCustomerNames() {
         return orderRepo.listOrdersWithCustomerNames();
     }
 
     @GET
     @Path("/customers/{customerId}")
-    public List<Object []> listOrdersWithCustomerId(@PathParam("customerId") Long userId){
+    public List<Object[]> listOrdersWithCustomerId(@PathParam("customerId") Long userId) {
         return orderRepo.listOrdersWithCustomerId(userId);
     }
 
-    @GET 
+    @GET
     @Path("/{orderId}/items")
-    public List<Object []> getOrderItemsWithBookTitles(@PathParam("orderId") Long orderId){
+    public List<Object[]> getOrderItemsWithBookTitles(@PathParam("orderId") Long orderId) {
         return orderRepo.listOrderItemsWithBookTitles(orderId);
     }
 
@@ -71,7 +69,7 @@ public class OrderResource {
 
     @GET
     @Path("/top5-books")
-    public List<Object []> getTop5Books(){
+    public List<Object[]> getTop5Books() {
         return orderRepo.top5BestsellingBooks();
     }
 
@@ -111,7 +109,7 @@ public class OrderResource {
         orderRepo.addOrderItems(order, items); // orderRepo handles item persistence
         return Response.ok(items).build();
     }
-    
+
     // Update order with items
     @PUT
     @Path("/{orderId}/items")
@@ -125,7 +123,7 @@ public class OrderResource {
         orderRepo.updateOrder(order, items);
         return Response.ok(order).build();
     }
-    
+
     // Delete order with items
     @DELETE
     @Path("/{id}")
@@ -138,22 +136,18 @@ public class OrderResource {
         return Response.noContent().build();
     }
 
-
     @POST
-    @Path("/cart/{cartId}/checkout")
+    @Path("/cart/{userId}/checkout")
     @Transactional
-    public Response checkout(@PathParam("cartId") Long cartId) {
+    public Response checkout(@PathParam("userId") Long userId) {
         try {
-            Order order = orderRepo.checkoutCart(cartId);
-            Double total = orderRepo.getTotalOfOrder(order.getId());
-            System.out.println(total);
+            Order order = orderRepo.checkoutCart(userId);
             return Response.status(Response.Status.CREATED).entity(order).build();
         } catch (IllegalArgumentException e) {
             return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
         } catch (IllegalStateException e) {
             return Response.status(Response.Status.CONFLICT).entity(e.getMessage()).build();
         }
-
     }
-  
+
 }

@@ -16,23 +16,23 @@ import jakarta.ws.rs.core.Response;
 
 @ApplicationScoped
 public class CartRepository {
-    
+
     @Inject
     EntityManager em;
 
-    public List<Object []> listCartItems(int cart_id){
+    public List<Object[]> listCartItems(int cart_id) {
         return em.createQuery(
-            "SELECT b.id, b.title, b.price, b.quantity" +
-            "FROM CartItem ci, Book b"+
-            "WHERE ci.bookId = b.id AND ci.cart_id = :cid",
-            Object[].class).setParameter("cid", cart_id).getResultList();
+                "SELECT b.id, b.title, b.price, b.quantity" +
+                        "FROM CartItem ci, Book b" +
+                        "WHERE ci.bookId = b.id AND ci.cart_id = :cid",
+                Object[].class).setParameter("cid", cart_id).getResultList();
     }
 
-      // Create cart + items
+    // Create cart + items
     @Transactional
     public void createCart(Cart cart, List<CartItem> items) {
-       em.persist(cart);
-       em.flush();  // ensure order.id is generated
+        em.persist(cart);
+        em.flush(); // ensure order.id is generated
 
         for (CartItem item : items) {
             item.setId(cart.getId());
@@ -43,18 +43,19 @@ public class CartRepository {
     @Transactional
     public void addCartItems(Cart cart, CartItem item) {
         int stock = em.createQuery(
-            "SELECT b.stock "+
-            "FROM Book b "+
-            "WHERE b.id = :bookId", int.class).setParameter("bookId", item.getBookId()).getSingleResult();
-        
-        if(item.getQuantity() > stock){
-               throw new IllegalStateException("Not enough stock for bookId=" + item.getBookId());
-        }else{
+                "SELECT b.stock " +
+                        "FROM Book b " +
+                        "WHERE b.id = :bookId",
+                int.class).setParameter("bookId", item.getBookId()).getSingleResult();
+
+        if (item.getQuantity() > stock) {
+            throw new IllegalStateException("Not enough stock for bookId=" + item.getBookId());
+        } else {
             item.setId(null); // ensure it's treated as new
             item.setCartId(cart.getId()); // link to the correct cart
             em.persist(item); // now it works
         }
-            
+
     }
 
     @Transactional
@@ -64,17 +65,16 @@ public class CartRepository {
 
         // Delete old cart items
         em.createQuery("DELETE FROM CartItem ci WHERE ci.cartId = :cid")
-        .setParameter("cid", cart.getId())
-        .executeUpdate();
+                .setParameter("cid", cart.getId())
+                .executeUpdate();
 
         // Add new items
         for (CartItem item : items) {
             item.setCartId(cart.getId()); // only set cartId
-            item.setId(null);             // ensure Hibernate treats it as new
+            item.setId(null); // ensure Hibernate treats it as new
             em.persist(item);
         }
     }
-
 
     // empty cart items
     @Transactional
@@ -83,31 +83,30 @@ public class CartRepository {
         if (cart != null) {
             // Delete all items in that cart
             em.createQuery("DELETE FROM CartItem ci WHERE ci.cartId = :cartId")
-            .setParameter("cartId", cart.getId())
-            .executeUpdate();
+                    .setParameter("cartId", cart.getId())
+                    .executeUpdate();
 
             return true;
         }
         return false;
     }
 
-
-     public Cart findById(Long cartId) {
+    public Cart findById(Long cartId) {
         return em.find(Cart.class, cartId);
     }
 
-     public List<Cart> listAll() {
+    public List<Cart> listAll() {
         return em.createQuery("SELECT c FROM Cart c", Cart.class).getResultList();
-     }
+    }
 
-     @Transactional
+    @Transactional
     public void updateOrder(Cart cart) {
         em.merge(cart);
     }
 
-    public Cart getCustomerCart(Long id){
-       Cart cart = em.createQuery(
-        "SELECT c FROM Cart c WHERE c.userId = :customerId", Cart.class)
+    public Cart getCustomerCart(Long id) {
+        Cart cart = em.createQuery(
+                "SELECT c FROM Cart c WHERE c.userId = :customerId", Cart.class)
                 .setParameter("customerId", id)
                 .getSingleResult();
 
@@ -145,19 +144,21 @@ public class CartRepository {
 
     public List<Object[]> listCartItemsWithBookTitles(Long userId) {
         return em.createQuery(
-                "SELECT b.id, b.title,b.author, b.price, ci.quantity " +
-                        "FROM CartItem ci JOIN Book b ON ci.bookId = b.id JOIN Cart c ON c.id = ci.cartId " +
+                "SELECT b.id, b.title,a.name, b.price, ci.quantity " +
+                        "FROM CartItem ci JOIN Book b ON ci.bookId = b.id JOIN Cart c ON c.id = ci.cartId JOIN Author a ON a.id = b.authorId "
+                        +
                         "WHERE c.userId = :uid",
                 Object[].class).setParameter("uid", userId).getResultList();
     }
 
     public Double getTotalOfCart(Long userId) {
-    Double total = em.createQuery(
-        "SELECT SUM(ci.quantity * b.price) " +
-        "FROM CartItem ci JOIN Book b ON ci.bookId = b.id JOIN Cart c ON c.id = ci.cartId " +
-        "WHERE c.userId = :uid", Double.class)
-        .setParameter("uid", userId)
-        .getSingleResult();
+        Double total = em.createQuery(
+                "SELECT SUM(ci.quantity * b.price) " +
+                        "FROM CartItem ci JOIN Book b ON ci.bookId = b.id JOIN Cart c ON c.id = ci.cartId " +
+                        "WHERE c.userId = :uid",
+                Double.class)
+                .setParameter("uid", userId)
+                .getSingleResult();
 
         return total != null ? total : 0.0;
     }
@@ -176,22 +177,26 @@ public class CartRepository {
 
         return deletedRows > 0;
     }
-    
-    @Transactional
-    public Response incrementCartItem( Long userId, Long bookId) {
-        CartItem item = em.createQuery(
-            "SELECT ci FROM CartItem ci JOIN Cart c ON ci.cartId = c.id WHERE ci.bookId = :bid AND c.userId = :uid", CartItem.class)
-            .setParameter("uid", userId)
-            .setParameter("bid", bookId)
-            .getSingleResult();
 
-        if (item == null) return Response.status(Response.Status.NOT_FOUND).build();
+    @Transactional
+    public Response incrementCartItem(Long userId, Long bookId) {
+        CartItem item = em.createQuery(
+                "SELECT ci FROM CartItem ci JOIN Cart c ON ci.cartId = c.id WHERE ci.bookId = :bid AND c.userId = :uid",
+                CartItem.class)
+                .setParameter("uid", userId)
+                .setParameter("bid", bookId)
+                .getSingleResult();
+
+        if (item == null)
+            return Response.status(Response.Status.NOT_FOUND).build();
         int stock = em.createQuery(
-                "SELECT b.stock "+
-                "FROM Book b "+
-                "WHERE b.id = :bookId", int.class).setParameter("bookId", item.getBookId()).getSingleResult();
-            
-        if(stock < item.getQuantity() + 1) return Response.status(Response.Status.NOT_ACCEPTABLE).build();
+                "SELECT b.stock " +
+                        "FROM Book b " +
+                        "WHERE b.id = :bookId",
+                int.class).setParameter("bookId", item.getBookId()).getSingleResult();
+
+        if (stock < item.getQuantity() + 1)
+            return Response.status(Response.Status.NOT_ACCEPTABLE).build();
 
         item.setQuantity(item.getQuantity() + 1);
         em.merge(item);
@@ -199,14 +204,16 @@ public class CartRepository {
     }
 
     @Transactional
-    public Response decrementCartItem( Long userId,Long bookId) {
+    public Response decrementCartItem(Long userId, Long bookId) {
         CartItem item = em.createQuery(
-            "SELECT ci FROM CartItem ci JOIN Cart c ON ci.cartId = c.id WHERE ci.bookId = :bid AND c.userId = :uid", CartItem.class)
-            .setParameter("uid", userId)
-            .setParameter("bid", bookId)
-            .getSingleResult();
+                "SELECT ci FROM CartItem ci JOIN Cart c ON ci.cartId = c.id WHERE ci.bookId = :bid AND c.userId = :uid",
+                CartItem.class)
+                .setParameter("uid", userId)
+                .setParameter("bid", bookId)
+                .getSingleResult();
 
-        if (item == null) return Response.status(Response.Status.NOT_FOUND).build();
+        if (item == null)
+            return Response.status(Response.Status.NOT_FOUND).build();
 
         if (item.getQuantity() > 1) {
             item.setQuantity(item.getQuantity() - 1);
@@ -215,6 +222,5 @@ public class CartRepository {
 
         return Response.ok(item).build();
     }
-
 
 }
