@@ -49,11 +49,11 @@ public class OrderRepository {
 
     public Double totalRevenueForMonth(int year, int month) {
         Double res = em.createQuery(
-            "SELECT sum(oi.quantity * b.price) " +
-            "FROM OrderItem oi JOIN Order o ON oi.orderId = o.id " +
-            "JOIN Book b ON oi.bookId = b.id " +
-            "WHERE FUNCTION('year', o.date) = :y " +
-            "AND FUNCTION('month', o.date) = :m",
+                "SELECT sum(oi.quantity * b.price) " +
+                        "FROM OrderItem oi JOIN Order o ON oi.orderId = o.id " +
+                        "JOIN Book b ON oi.bookId = b.id " +
+                        "WHERE FUNCTION('year', o.date) = :y " +
+                        "AND FUNCTION('month', o.date) = :m",
                 Double.class).setParameter("y", year).setParameter("m", month).getSingleResult();
         if (res == null) {
             return 0d;
@@ -65,10 +65,10 @@ public class OrderRepository {
     public List<Object[]> top5BestsellingBooks() {
         return em.createQuery(
                 "SELECT b.id, b.title, SUM(oi.quantity * b.price) AS revenue " +
-                "FROM OrderItem oi, Book b " +
-                "WHERE oi.bookId = b.id " +
-                "GROUP BY b.id, b.title " +
-                "ORDER BY revenue DESC",
+                        "FROM OrderItem oi, Book b " +
+                        "WHERE oi.bookId = b.id " +
+                        "GROUP BY b.id, b.title " +
+                        "ORDER BY revenue DESC",
                 Object[].class).setMaxResults(5).getResultList();
     }
 
@@ -87,11 +87,11 @@ public class OrderRepository {
         }
     }
 
-      // Create order + items
+    // Create order + items
     @Transactional
     public void createOrder(Order order, List<OrderItem> items) {
-       em.persist(order);
-       em.flush();  // ensure order.id is generated
+        em.persist(order);
+        em.flush(); // ensure order.id is generated
 
         for (OrderItem item : items) {
             item.setOrderId(order.getId());
@@ -114,8 +114,8 @@ public class OrderRepository {
 
         // Sil eski itemları
         em.createQuery("DELETE FROM OrderItem oi WHERE oi.orderId = :oid")
-          .setParameter("oid", order.getId())
-          .executeUpdate();
+                .setParameter("oid", order.getId())
+                .executeUpdate();
 
         // Ekle yeni itemları
         for (OrderItem item : items) {
@@ -130,41 +130,41 @@ public class OrderRepository {
         Order order = em.find(Order.class, orderId);
         if (order != null) {
             em.createQuery("DELETE FROM OrderItem oi WHERE oi.orderId = :oid")
-              .setParameter("oid", orderId)
-              .executeUpdate();
+                    .setParameter("oid", orderId)
+                    .executeUpdate();
             em.remove(order);
             return true;
         }
         return false;
     }
 
-     public Order findById(Long orderId) {
+    public Order findById(Long orderId) {
         return em.find(Order.class, orderId);
     }
 
-     public List<Order> listAll() {
+    public List<Order> listAll() {
         return em.createQuery("SELECT o FROM Order o", Order.class).getResultList();
-     }
+    }
 
-     @Transactional
+    @Transactional
     public void updateOrder(Order order) {
         em.merge(order);
     }
 
-    public Order checkoutCart(Long cartId) {
+    public Order checkoutCart(Long userId) {
         Long cartExists = em.createQuery(
-                "SELECT COUNT(c) FROM Cart c WHERE c.id = :cartId", Long.class)
-                .setParameter("cartId", cartId)
+                "SELECT COUNT(c) FROM Cart c WHERE c.userId = :userId", Long.class)
+                .setParameter("userId", userId)
                 .getSingleResult();
         if (cartExists == 0) {
             throw new IllegalArgumentException("Cart not found");
         }
 
-        //get cart items
+        // get cart items
         List<CartItem> cartItems = em.createQuery(
-            "SELECT ci FROM CartItem ci WHERE ci.cartId = :cartId", CartItem.class)
-            .setParameter("cartId", cartId)
-            .getResultList();
+                "SELECT ci FROM CartItem ci JOIN Cart c ON c.id = ci.cartId WHERE c.userId = :uid", CartItem.class)
+                .setParameter("uid", userId)
+                .getResultList();
 
         if (cartItems.isEmpty()) {
             throw new IllegalStateException("Cart is empty");
@@ -173,39 +173,40 @@ public class OrderRepository {
         // Create new order
         Order order = new Order();
 
-        order.setUserId(em.find(Cart.class, cartId).getUserId());
+        order.setUserId(userId);
 
         List<OrderItem> orderItems = cartItems.stream()
-        .map(ci -> new OrderItem(null, ci.getBookId(), ci.getQuantity()))
-        .toList();
+                .map(ci -> new OrderItem(null, ci.getBookId(), ci.getQuantity()))
+                .toList();
 
-        //insert order items
-        createOrder(order,orderItems);
-    
+        // insert order items
+        createOrder(order, orderItems);
+
         // Decrease stock
         for (CartItem item : cartItems) {
             bookRepo.decreaseStock(item.getBookId(), item.getQuantity());
         }
 
-        //clear cart
+        // find cart id and delete cart items
+        Long cartId = em.createQuery("SELECT c.id FROM Cart c WHERE c.userId = :uid", Long.class)
+                .setParameter("uid", userId).getSingleResult();
         em.createQuery("DELETE FROM CartItem ci WHERE ci.cartId = :cartId")
-            .setParameter("cartId", cartId)
-            .executeUpdate();
+                .setParameter("cartId", cartId)
+                .executeUpdate();
 
         return order;
     }
 
-   public Double getTotalOfOrder(Long orderId) {
-    Double total = em.createQuery(
-        "SELECT SUM(oi.quantity * b.price) " +
-        "FROM OrderItem oi JOIN Book b ON oi.bookId = b.id " +
-        "WHERE oi.orderId = :oid", Double.class)
-        .setParameter("oid", orderId)
-        .getSingleResult();
+    public Double getTotalOfOrder(Long orderId) {
+        Double total = em.createQuery(
+                "SELECT SUM(oi.quantity * b.price) " +
+                        "FROM OrderItem oi JOIN Book b ON oi.bookId = b.id " +
+                        "WHERE oi.orderId = :oid",
+                Double.class)
+                .setParameter("oid", orderId)
+                .getSingleResult();
 
-    return total != null ? total : 0.0;
+        return total != null ? total : 0.0;
+    }
+
 }
-
-}
-
-
