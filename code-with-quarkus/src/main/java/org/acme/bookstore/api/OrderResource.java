@@ -140,18 +140,20 @@ public class OrderResource {
 
 
     @POST
-    @Path("/cart/{userId}/checkout")
+    @Path("/cart/{cartId}/checkout")
     @Transactional
-    public Response checkout(@PathParam("userId") Long userId) {
+    public Response checkout(@PathParam("cartId") Long cartId) {
         try {
-            Order order = orderRepo.checkoutCart(userId);
+            Order order = orderRepo.checkoutCart(cartId);
+            Double total = orderRepo.getTotalOfOrder(order.getId());
+            System.out.println(total);
             return Response.status(Response.Status.CREATED).entity(order).build();
         } catch (IllegalArgumentException e) {
             return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
         } catch (IllegalStateException e) {
             return Response.status(Response.Status.CONFLICT).entity(e.getMessage()).build();
         }
-    }
 
+    }
   
 }
