@@ -5,6 +5,13 @@
 -- insert into myentity (id, field) values(3, 'field-3');
 -- alter sequence myentity_seq restart with 4;
 -- src/main/resources/import.sql
+-- Add column for image URL
+ALTER TABLE books ADD COLUMN cover_image_url VARCHAR(512);
+
+-- Set image URL for I, Robot
+UPDATE books 
+SET cover_image_url = 'https://upload.wikimedia.org/wikipedia/en/2/2e/I_Robot_%28book%29.jpg'
+WHERE title = 'I, Robot';
 
 -- Authors
 INSERT INTO authors (id, name) VALUES

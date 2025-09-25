@@ -21,7 +21,7 @@ public class Book {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "book_id") // column name
+    @Column(name = "book_id") 
     private Long id;
 
     @Column(name = "title", nullable = false, length = 255)
@@ -60,6 +60,9 @@ public class Book {
     @Column(name = "publisher_id", nullable = false)
     private Long publisherId;
 
+    @Column(name = "book_image_url")
+    private String bookImageUrl;
+
     @Transient
     private String authorName;
 
@@ -67,7 +70,7 @@ public class Book {
     }
 
     public Book(String title, BookFormat format, BookLang language, LocalDate date, double price, int pageNumber,
-            String isbn, int stock, Genre genre, Long publisherId, long authorId) {
+            String isbn, int stock, Genre genre, Long publisherId, long authorId,String bookImageUrl ) {
         this.title = title;
         this.format = format;
         this.language = language;
@@ -79,6 +82,7 @@ public class Book {
         this.genre = genre;
         this.publisherId = publisherId;
         this.authorId = authorId;
+        this.bookImageUrl = bookImageUrl;
     }
 
     // Getters and setters
@@ -184,5 +188,13 @@ public class Book {
 
     public void setAuthorId(Long authorId) {
         this.authorId = authorId;
+    }
+
+    public String getBookImageUrl() {
+        return bookImageUrl;
+    }
+
+    public void setBookImageUrl(String bookImageUrl) {
+        this.bookImageUrl = bookImageUrl;
     }
 }
