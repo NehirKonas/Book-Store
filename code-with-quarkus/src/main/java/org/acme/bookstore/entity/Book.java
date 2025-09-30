@@ -7,11 +7,18 @@ import java.time.LocalDate;
 @Table(name = "books")
 public class Book {
 
-    public enum BookFormat { PHYSICAL, EBOOK, AUDIOBOOK }
-    public enum BookLang { ENGLISH, GERMAN, FRENCH, TURKISH, SPANISH }
-    public enum Genre { POETRY, HORROR, SHORTSTORY, SCIFI, NONFICTIONAL, COOKING , HISTORY }
-    
-    
+    public enum BookFormat {
+        PHYSICAL, EBOOK, AUDIOBOOK
+    }
+
+    public enum BookLang {
+        ENGLISH, GERMAN, FRENCH, TURKISH, SPANISH
+    }
+
+    public enum Genre {
+        POETRY, HORROR, SHORTSTORY, SCIFI, NONFICTIONAL, COOKING, HISTORY
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "book_id") 
@@ -34,7 +41,6 @@ public class Book {
 
     @Column(name = "publish_date")
     private LocalDate date;
-
 
     @Column(name = "authorId")
     private long authorId;
