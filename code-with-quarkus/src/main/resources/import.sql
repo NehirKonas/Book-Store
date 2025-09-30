@@ -3,6 +3,7 @@
 -- insert into myentity (id, field) values(1, 'field-1');
 -- insert into myentity (id, field) values(2, 'field-2');
 -- insert into myentity (id, field) values(3, 'field-3');
+<<<<<<< HEAD
 -- alter sequence myentity_seq restart with 4;
 -- src/main/resources/import.sql
 -- Add column for image URL
@@ -85,3 +86,6 @@ INSERT INTO customers (
   'secret123',               -- (store a hash in real apps)
   '+90 555 123 45 67'
 );
+=======
+-- alter sequence myentity_seq restart with 4;
+>>>>>>> e404ae3d3e21d67a50377e7cad7e4eb6ff0c1993
