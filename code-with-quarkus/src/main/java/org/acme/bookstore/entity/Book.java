@@ -7,14 +7,21 @@ import java.time.LocalDate;
 @Table(name = "books")
 public class Book {
 
-    public enum BookFormat { PHYSICAL, EBOOK, AUDIOBOOK }
-    public enum BookLang { ENGLISH, GERMAN, FRENCH, TURKISH, SPANISH }
-    public enum Genre { POETRY, HORROR, SHORTSTORY, SCIFI, NONFICTIONAL, COOKING , HISTORY }
-    
-    
+    public enum BookFormat {
+        PHYSICAL, EBOOK, AUDIOBOOK
+    }
+
+    public enum BookLang {
+        ENGLISH, GERMAN, FRENCH, TURKISH, SPANISH
+    }
+
+    public enum Genre {
+        POETRY, HORROR, SHORTSTORY, SCIFI, NONFICTIONAL, COOKING, HISTORY
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "book_id") // column name
+    @Column(name = "book_id") 
     private Long id;
 
     @Column(name = "title", nullable = false, length = 255)
@@ -35,8 +42,8 @@ public class Book {
     @Column(name = "publish_date")
     private LocalDate date;
 
-    @Column(name = "author")
-    private String author;
+    @Column(name = "authorId")
+    private long authorId;
 
     @Column(name = "price")
     private double price;
@@ -53,56 +60,141 @@ public class Book {
     @Column(name = "publisher_id", nullable = false)
     private Long publisherId;
 
-    public Book() {}
+    @Column(name = "book_image_url")
+    private String bookImageUrl;
 
-    public Book(String title, BookFormat format, BookLang language, LocalDate date, double price, int pageNumber, String isbn, int stock, Genre genre, Long publisherId, String author) {
-    this.title = title;
-    this.format = format;
-    this.language = language;
-    this.date = date;
-    this.price = price;
-    this.pageNumber = pageNumber;
-    this.isbn = isbn;
-    this.stock = stock;
-    this.genre = genre;
-    this.publisherId = publisherId;
-    this.author = author;
-}
+    @Transient
+    private String authorName;
+
+    public Book() {
+    }
+
+    public Book(String title, BookFormat format, BookLang language, LocalDate date, double price, int pageNumber,
+            String isbn, int stock, Genre genre, Long publisherId, long authorId,String bookImageUrl ) {
+        this.title = title;
+        this.format = format;
+        this.language = language;
+        this.date = date;
+        this.price = price;
+        this.pageNumber = pageNumber;
+        this.isbn = isbn;
+        this.stock = stock;
+        this.genre = genre;
+        this.publisherId = publisherId;
+        this.authorId = authorId;
+        this.bookImageUrl = bookImageUrl;
+    }
 
     // Getters and setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
 
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public BookFormat getFormat() { return format; }
-    public void setFormat(BookFormat format) { this.format = format; }
+    public String getAuthorName() {
+        return authorName;
+    }
 
-    public BookLang getLanguage() { return language; }
-    public void setLanguage(BookLang language) { this.language = language; }
+    public void setAuthorName(String authorName) {
+        this.authorName = authorName;
+    }
 
-    public Genre getGenre() { return genre; }
-    public void setGenre(Genre genre) { this.genre = genre; }
+    public String getTitle() {
+        return title;
+    }
 
-    public LocalDate getDate() { return date; }
-    public void setDate(LocalDate date) { this.date = date; }
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
-    public double getPrice() { return price; }
-    public void setPrice(double price) { this.price = price; }
+    public BookFormat getFormat() {
+        return format;
+    }
 
-    public int getPageNumber() { return pageNumber; }
-    public void setPageNumber(int pageNumber) { this.pageNumber = pageNumber; }
+    public void setFormat(BookFormat format) {
+        this.format = format;
+    }
 
-    public String getIsbn() { return isbn; }
-    public void setIsbn(String isbn) { this.isbn = isbn; }
+    public BookLang getLanguage() {
+        return language;
+    }
 
-    public int getStock() { return stock; }
-    public void setStock(int stock) { this.stock = stock; }
+    public void setLanguage(BookLang language) {
+        this.language = language;
+    }
 
-    public Long getPublisherId() { return publisherId; }
-    public void setPublisherId(Long publisherId) { this.publisherId = publisherId; }
+    public Genre getGenre() {
+        return genre;
+    }
 
-    public String getAuthor() { return author; }
-    public void setAuthor(String author) { this.author = author; }
+    public void setGenre(Genre genre) {
+        this.genre = genre;
+    }
+
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public int getPageNumber() {
+        return pageNumber;
+    }
+
+    public void setPageNumber(int pageNumber) {
+        this.pageNumber = pageNumber;
+    }
+
+    public String getIsbn() {
+        return isbn;
+    }
+
+    public void setIsbn(String isbn) {
+        this.isbn = isbn;
+    }
+
+    public int getStock() {
+        return stock;
+    }
+
+    public void setStock(int stock) {
+        this.stock = stock;
+    }
+
+    public Long getPublisherId() {
+        return publisherId;
+    }
+
+    public void setPublisherId(Long publisherId) {
+        this.publisherId = publisherId;
+    }
+
+    public Long getAuthorId() {
+        return authorId;
+    }
+
+    public void setAuthorId(Long authorId) {
+        this.authorId = authorId;
+    }
+
+    public String getBookImageUrl() {
+        return bookImageUrl;
+    }
+
+    public void setBookImageUrl(String bookImageUrl) {
+        this.bookImageUrl = bookImageUrl;
+    }
 }
